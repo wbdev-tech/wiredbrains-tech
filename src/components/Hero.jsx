@@ -1,0 +1,105 @@
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ArrowRight, Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import AnimatedHeroBackground from '@/components/AnimatedHeroBackground';
+
+const Hero = () => {
+  const navigate = useNavigate();
+  const handleCTAClick = () => {
+    navigate('/contact');
+  };
+  
+  const handleViewWorkClick = () => {
+    const portfolioSection = document.getElementById('portfolio');
+    if (portfolioSection) {
+      portfolioSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+      <AnimatedHeroBackground />
+      <div className="absolute inset-0 bg-black/40"></div>
+
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-5xl mx-auto text-left md:text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8"
+          >
+            <Shield className="w-4 h-4 text-[#F54B15]" />
+            <span className="text-sm text-gray-300 uppercase">Enterprise-Grade IT Solutions</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight text-white uppercase"
+          >
+            Secure Your
+            <span className="block text-[#F54B15]">Digital Future</span>
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto"
+          >
+            Comprehensive managed IT services and cybersecurity solutions that protect your business, optimize operations, and drive innovation.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+            className="flex flex-col sm:flex-row gap-4 justify-start md:justify-center"
+          >
+            <Button
+              onClick={handleCTAClick}
+              size="lg"
+              className="bg-[#F54B15] hover:bg-[#D63F11] text-white font-bold px-8 py-6 text-lg rounded-full group"
+            >
+              Get Started
+              <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
+            <Button
+              onClick={handleViewWorkClick}
+              size="lg"
+              variant="outline"
+              className="border-2 border-[#F54B15]/40 hover:bg-[#F54B15]/10 text-white px-8 py-6 text-lg rounded-full"
+            >
+              Explore Services
+            </Button>
+          </motion.div>
+        </div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1, delay: 1 }}
+        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 hidden md:block"
+      >
+        <motion.div
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="w-6 h-10 border-2 border-[#F54B15]/40 rounded-full flex items-start justify-center p-2"
+        >
+          <motion.div
+            animate={{ y: [0, 12, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-1.5 h-1.5 bg-[#F54B15] rounded-full"
+          />
+        </motion.div>
+      </motion.div>
+    </section>
+  );
+};
+
+export default Hero;
