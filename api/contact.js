@@ -17,7 +17,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Please enter a valid email address' });
     }
 
-    // Optional reCAPTCHA verification
+    // Optional reCAPTCHA verification - only verify if both secret key AND token are provided
     if (process.env.RECAPTCHA_SECRET_KEY && recaptchaToken) {
       console.log('Verifying reCAPTCHA...');
 
@@ -36,9 +36,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'reCAPTCHA verification failed. Please try again.' });
       }
 
-      console.log('reCAPTCHA verification successful');
-    } else if (process.env.RECAPTCHA_SECRET_KEY && !recaptchaToken) {
-      return res.status(400).json({ error: 'reCAPTCHA verification required' });
+      console.log('reCAPTCHA verification successful, score:', recaptchaData.score);
     }
 
     console.log('Form submission received:', { name, email, company, phone });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,32 @@ const Contact = () => {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
+  const recaptchaRef = useRef(null);
+
+  const recaptchaSiteKey = import.meta.env.VITE_RECAPTCHA_SITE_ID;
+
+  // Load reCAPTCHA script
+  useEffect(() => {
+    if (!recaptchaSiteKey) return;
+
+    const script = document.createElement('script');
+    script.src = `https://www.google.com/recaptcha/api.js?render=${recaptchaSiteKey}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      if (window.grecaptcha) {
+        window.grecaptcha.ready(() => {
+          setRecaptchaLoaded(true);
+        });
+      }
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      document.head.removeChild(script);
+    };
+  }, [recaptchaSiteKey]);
 
   const validate = () => {
     let tempErrors = {};
@@ -59,6 +85,16 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
+      // Get reCAPTCHA token if available
+      let recaptchaToken = null;
+      if (window.grecaptcha && recaptchaSiteKey && recaptchaLoaded) {
+        try {
+          recaptchaToken = await window.grecaptcha.execute(recaptchaSiteKey, { action: 'contact_form' });
+        } catch (recaptchaError) {
+          console.error('reCAPTCHA execution failed:', recaptchaError);
+        }
+      }
+
       const response = await fetch('/api/contact', {
         method: 'POST',
         headers: {
@@ -70,6 +106,7 @@ const Contact = () => {
           phone: formData.phone || '',
           company: formData.company || '',
           message: formData.message,
+          recaptchaToken,
         }),
       });
 
@@ -201,6 +238,14 @@ const Contact = () => {
                   {!isSubmitting && <ArrowRight className="ml-2 h-5 w-5 transform transition-transform duration-300 group-hover:translate-x-1" />}
                 </Button>
               </div>
+              {recaptchaSiteKey && (
+                <p className="text-xs text-gray-500 text-center">
+                  This site is protected by reCAPTCHA and the Google{' '}
+                  <a href="https://policies.google.com/privacy" className="underline hover:text-gray-300" target="_blank" rel="noopener noreferrer">Privacy Policy</a> and{' '}
+                  <a href="https://policies.google.com/terms" className="underline hover:text-gray-300" target="_blank" rel="noopener noreferrer">Terms of Service</a> apply.
+                </p>
+              )}
+              <div ref={recaptchaRef} style={{ display: 'none' }}></div>
             </form>
           </SectionAnimator>
         </div>
