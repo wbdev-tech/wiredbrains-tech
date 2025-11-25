@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import emailjs from '@emailjs/browser';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,11 +19,6 @@ const pageTransition = {
   ease: 'anticipate',
   duration: 0.8,
 };
-
-// EmailJS credentials
-const EMAILJS_SERVICE_ID = 'service_d773i0s';
-const EMAILJS_TEMPLATE_ID = 'template_7rr2q4i';
-const EMAILJS_PUBLIC_KEY = 'XjsQFnsPldjitlLOU';
 
 const Contact = () => {
   const { toast } = useToast();
@@ -63,38 +57,48 @@ const Contact = () => {
     }
 
     setIsSubmitting(true);
-    
-    // Ensure template parameter keys match your EmailJS template
-    const templateParams = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || 'Not Provided',
-        company: formData.company || 'Not Provided',
-        message: formData.message,
-        to_email: 'nippundhiman@gmail.com',
-        to_name: 'Wired Brains Team',
-    };
 
     try {
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams, EMAILJS_PUBLIC_KEY);
-
-      toast({
-        title: 'Message Sent!',
-        description: "Thanks for reaching out. We'll get back to you shortly.",
-        variant: 'default',
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone || '',
+          company: formData.company || '',
+          message: formData.message,
+        }),
       });
 
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        company: '',
-        message: '',
-      });
-      setErrors({});
+      const data = await response.json();
 
+      if (response.ok) {
+        toast({
+          title: 'Message Sent!',
+          description: "Thanks for reaching out. We'll get back to you shortly.",
+          variant: 'default',
+        });
+
+        setFormData({
+          name: '',
+          email: '',
+          phone: '',
+          company: '',
+          message: '',
+        });
+        setErrors({});
+      } else {
+        toast({
+          title: 'Submission Failed',
+          description: data.error || 'There was a problem sending your message. Please try again.',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
-      console.error('Error sending email with EmailJS:', error);
+      console.error('Error submitting contact form:', error);
       toast({
         title: 'Submission Failed',
         description: 'There was a problem sending your message. Please try again.',
